@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказать разработку - ananas.guru</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-button-color: #2481cc;
+            --tg-theme-button-text-color: #ffffff;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .btn-primary {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="max-w-2xl mx-auto p-4">
+            <!-- Заголовок -->
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold mb-2">Заказать разработку</h1>
+                <p class="text-gray-600">Расскажите о вашем проекте и получите расчет стоимости</p>
+            </div>
+
+            <form @submit.prevent="submitForm" class="space-y-6">
+                <!-- Тип проекта -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Тип проекта *</label>
+                    <select v-model="form.projectType" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                        <option value="">Выберите тип проекта</option>
+                        <option value="mobile">📱 Мобильное приложение</option>
+                        <option value="web">🌐 Веб-сайт/приложение</option>
+                        <option value="ai">🤖 AI решение</option>
+                        <option value="integration">🔗 Интеграция систем</option>
+                    </select>
+                </div>
+
+                <!-- Название проекта -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Название проекта *</label>
+                    <input 
+                        v-model="form.projectName" 
+                        type="text" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg" 
+                        placeholder="Например: Приложение доставки еды"
+                        required
+                    >
+                </div>
+
+                <!-- Описание -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Описание проекта *</label>
+                    <textarea 
+                        v-model="form.description" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg h-24 resize-none" 
+                        placeholder="Опишите основную идею и функционал"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Платформы (для мобильных) -->
+                <div v-if="form.projectType === 'mobile'">
+                    <label class="block text-sm font-medium mb-2">Платформы</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input v-model="form.platforms" type="checkbox" value="ios" class="mr-2">
+                            <span>iOS (iPhone/iPad)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input v-model="form.platforms" type="checkbox" value="android" class="mr-2">
+                            <span>Android</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input v-model="form.platforms" type="checkbox" value="cross" class="mr-2">
+                            <span>Кроссплатформенное (Flutter/React Native)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Функции -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Основные функции</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label v-for="feature in availableFeatures" :key="feature.id" class="flex items-center text-sm">
+                            <input v-model="form.features" type="checkbox" :value="feature.id" class="mr-2">
+                            <span>{{ feature.name }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Бюджет -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Планируемый бюджет</label>
+                    <select v-model="form.budget" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                        <option value="">Выберите диапазон</option>
+                        <option value="50-100">50,000 - 100,000 ₽</option>
+                        <option value="100-300">100,000 - 300,000 ₽</option>
+                        <option value="300-500">300,000 - 500,000 ₽</option>
+                        <option value="500-1000">500,000 - 1,000,000 ₽</option>
+                        <option value="1000+">Более 1,000,000 ₽</option>
+                    </select>
+                </div>
+
+                <!-- Контакты -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Контактная информация</label>
+                    <input 
+                        v-model="form.contact" 
+                        type="text" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg" 
+                        placeholder="Телефон или email для связи"
+                    >
+                </div>
+
+                <!-- Калькулятор стоимости -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-gray-900 mb-2">💰 Предварительная стоимость</h3>
+                    <div class="text-2xl font-bold text-blue-600">{{ calculatedPrice }} ₽</div>
+                    <p class="text-sm text-gray-600 mt-1">Точная стоимость определяется после анализа требований</p>
+                </div>
+
+                <!-- Кнопка отправки -->
+                <button 
+                    type="submit" 
+                    :disabled="isSubmitting"
+                    class="btn-primary w-full px-6 py-3 rounded-lg font-medium disabled:opacity-50"
+                >
+                    {{ isSubmitting ? 'Отправка...' : 'Отправить заявку' }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                // Инициализация Telegram WebApp
+                if (window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand();
+                }
+
+                const form = ref({
+                    projectType: '',
+                    projectName: '',
+                    description: '',
+                    platforms: [],
+                    features: [],
+                    budget: '',
+                    contact: ''
+                });
+
+                const isSubmitting = ref(false);
+
+                const availableFeatures = ref([
+                    { id: 'auth', name: 'Авторизация' },
+                    { id: 'payments', name: 'Платежи' },
+                    { id: 'push', name: 'Push уведомления' },
+                    { id: 'chat', name: 'Чат/Сообщения' },
+                    { id: 'maps', name: 'Карты/Геолокация' },
+                    { id: 'social', name: 'Соцсети' },
+                    { id: 'admin', name: 'Админ панель' },
+                    { id: 'api', name: 'API интеграции' }
+                ]);
+
+                const calculatedPrice = computed(() => {
+                    let basePrice = 0;
+                    
+                    switch (form.value.projectType) {
+                        case 'mobile': basePrice = 150000; break;
+                        case 'web': basePrice = 80000; break;
+                        case 'ai': basePrice = 120000; break;
+                        case 'integration': basePrice = 60000; break;
+                        default: return '0';
+                    }
+                    
+                    basePrice += form.value.features.length * 15000;
+                    
+                    if (form.value.platforms.includes('ios') && form.value.platforms.includes('android')) {
+                        basePrice += 50000;
+                    }
+                    
+                    return basePrice.toLocaleString('ru-RU');
+                });
+
+                const submitForm = async () => {
+                    isSubmitting.value = true;
+                    
+                    try {
+                        const formData = {
+                            ...form.value,
+                            telegram_user: window.Telegram?.WebApp?.initDataUnsafe?.user,
+                            calculated_price: calculatedPrice.value
+                        };
+                        
+                        if (window.Telegram?.WebApp) {
+                            window.Telegram.WebApp.sendData(JSON.stringify(formData));
+                        } else {
+                            console.log('Form data:', formData);
+                            alert('Заявка отправлена! Мы свяжемся с вами в ближайшее время.');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Submit error:', error);
+                        alert('Ошибка отправки. Попробуйте еще раз.');
+                    } finally {
+                        isSubmitting.value = false;
+                    }
+                };
+
+                return {
+                    form,
+                    isSubmitting,
+                    availableFeatures,
+                    calculatedPrice,
+                    submitForm
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

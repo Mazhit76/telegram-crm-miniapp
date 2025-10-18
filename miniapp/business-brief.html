@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бриф на разработку - ananas.guru</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="max-w-3xl mx-auto p-4">
+            <!-- Заголовок -->
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold mb-3">Бриф на разработку приложения</h1>
+                <p class="text-gray-600">Эта анкета поможет мне вникнуть в твой проект и предложить лучшее решение</p>
+            </div>
+
+            <form @submit.prevent="submitForm" class="space-y-8">
+                <!-- Тип приложения -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <label class="block text-lg font-medium mb-4">К какому типу/типам относится твое приложение? *</label>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label v-for="type in appTypes" :key="type.id" class="flex items-center p-2 hover:bg-gray-50 rounded">
+                            <input v-model="form.appTypes" type="checkbox" :value="type.id" class="mr-3 w-4 h-4">
+                            <span>{{ type.name }}</span>
+                        </label>
+                    </div>
+                    <div class="mt-4">
+                        <input v-model="form.customAppType" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Другое (укажите свой вариант)">
+                    </div>
+                </div>
+
+                <!-- Аналоги -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <label class="block text-lg font-medium mb-4">Отметь приложения, с которыми у твоего есть что-то общее *</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label v-for="analog in analogs" :key="analog.id" class="flex items-center p-2 hover:bg-gray-50 rounded">
+                            <input v-model="form.analogs" type="checkbox" :value="analog.id" class="mr-2 w-4 h-4">
+                            <span class="text-sm">{{ analog.name }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Технические фишки -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <label class="block text-lg font-medium mb-4">Какие технические "фишки" будут в приложении? *</label>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label v-for="feature in techFeatures" :key="feature.id" class="flex items-center p-2 hover:bg-gray-50 rounded">
+                            <input v-model="form.techFeatures" type="checkbox" :value="feature.id" class="mr-3 w-4 h-4">
+                            <span>{{ feature.name }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Цель создания -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <label class="block text-lg font-medium mb-4">Цель создания приложения *</label>
+                    <div class="space-y-3">
+                        <label v-for="goal in businessGoals" :key="goal.id" class="flex items-center p-2 hover:bg-gray-50 rounded">
+                            <input v-model="form.businessGoals" type="checkbox" :value="goal.id" class="mr-3 w-4 h-4">
+                            <span>{{ goal.name }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Описание проекта -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <label class="block text-lg font-medium mb-2">Описание будущего приложения *</label>
+                    <p class="text-sm text-gray-600 mb-4">Напиши все, что считаешь нужным</p>
+                    <textarea 
+                        v-model="form.projectDescription" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg h-40 resize-none" 
+                        placeholder="Подробно опишите идею, функционал, особенности, целевую аудиторию, бизнес-модель..."
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Бюджет и сроки -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <label class="block text-lg font-medium mb-4">Максимальный бюджет *</label>
+                        <select v-model="form.budget" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                            <option value="">Выберите диапазон</option>
+                            <option value="100-300">100,000 - 300,000 ₽</option>
+                            <option value="300-500">300,000 - 500,000 ₽</option>
+                            <option value="500-800">500,000 - 800,000 ₽</option>
+                            <option value="800-1500">800,000 - 1,500,000 ₽</option>
+                            <option value="1500-3000">1,500,000 - 3,000,000 ₽</option>
+                            <option value="3000+">Более 3,000,000 ₽</option>
+                        </select>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <label class="block text-lg font-medium mb-4">Сроки разработки *</label>
+                        <select v-model="form.timeline" class="w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                            <option value="">Выберите сроки</option>
+                            <option value="1-2">1-2 месяца</option>
+                            <option value="2-4">2-4 месяца</option>
+                            <option value="4-6">4-6 месяцев</option>
+                            <option value="6-12">6-12 месяцев</option>
+                            <option value="12+">Более года</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Загрузка файлов -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <label class="block text-lg font-medium mb-2">Файлы с описанием проекта</label>
+                    <p class="text-sm text-gray-600 mb-4">Максимум 5 файлов, до 10MB каждый (PDF, DOC, изображения)</p>
+                    <input 
+                        @change="handleFileUpload" 
+                        type="file" 
+                        multiple
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
+                        class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer"
+                    >
+                    <div v-if="uploadedFiles.length > 0" class="mt-3">
+                        <p class="text-sm font-medium mb-2">Загруженные файлы:</p>
+                        <div v-for="file in uploadedFiles" :key="file.name" class="flex items-center justify-between bg-gray-50 p-2 rounded mb-1">
+                            <span class="text-sm">{{ file.name }}</span>
+                            <button @click="removeFile(file)" type="button" class="text-red-500 text-sm">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Контакты -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-medium mb-4">Контактная информация</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Ваше имя *</label>
+                            <input 
+                                v-model="form.clientName" 
+                                type="text" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg" 
+                                placeholder="Как к вам обращаться?"
+                                required
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Номер телефона *</label>
+                            <input 
+                                v-model="form.phone" 
+                                type="tel" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg" 
+                                placeholder="+7 (999) 123-45-67"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка отправки -->
+                <div class="text-center">
+                    <button 
+                        type="submit" 
+                        :disabled="isSubmitting"
+                        class="bg-blue-600 text-white px-8 py-4 rounded-lg font-medium text-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        {{ isSubmitting ? 'Отправка...' : 'Отправить бриф' }}
+                    </button>
+                    <p class="text-sm text-gray-600 mt-3">После отправки мы свяжемся с вами в течение 2 часов</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                if (window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand();
+                }
+
+                const form = ref({
+                    appTypes: [],
+                    customAppType: '',
+                    analogs: [],
+                    techFeatures: [],
+                    businessGoals: [],
+                    projectDescription: '',
+                    budget: '',
+                    timeline: '',
+                    clientName: '',
+                    phone: ''
+                });
+
+                const uploadedFiles = ref([]);
+                const isSubmitting = ref(false);
+
+                const appTypes = ref([
+                    { id: 'chat', name: 'Чат' },
+                    { id: 'ecommerce', name: 'Интернет магазин' },
+                    { id: 'marketplace', name: 'Биржа заказчиков и исполнителей' },
+                    { id: 'social', name: 'Социальное приложение (отзывы, комментарии, чат)' },
+                    { id: 'crm', name: 'Система учета (CRM)' },
+                    { id: 'news', name: 'Лента новостей' },
+                    { id: 'media', name: 'Видео- или аудио- плеер' },
+                    { id: 'streaming', name: 'Стриминг (прямая трансляция)' },
+                    { id: 'analytics', name: 'Аналитическая платформа' },
+                    { id: 'webview', name: 'Webview приложение' },
+                    { id: 'education', name: 'Онлайн обучение' },
+                    { id: 'booking', name: 'Система бронирования' },
+                    { id: 'delivery', name: 'Доставка' }
+                ]);
+
+                const analogs = ref([
+                    { id: 'avito', name: 'Авито' },
+                    { id: 'delivery', name: 'Delivery Club' },
+                    { id: 'hh', name: 'HeadHunter' },
+                    { id: 'profi', name: 'Профи.ру' },
+                    { id: 'taxi', name: 'Яндекс Такси' },
+                    { id: 'aviasales', name: 'Aviasales' },
+                    { id: 'tinder', name: 'Tinder' },
+                    { id: 'youtube', name: 'YouTube' },
+                    { id: 'instagram', name: 'Instagram' },
+                    { id: 'tiktok', name: 'TikTok' },
+                    { id: 'twitter', name: 'Twitter' },
+                    { id: 'cian', name: 'Циан' },
+                    { id: 'marketplace', name: 'OZON / Wildberries / Яндекс Маркет' },
+                    { id: 'productivity', name: 'Trello / Notion / Todoist' },
+                    { id: 'kickstarter', name: 'KickStarter' },
+                    { id: 'twitch', name: 'Twitch' },
+                    { id: 'reddit', name: 'Reddit' }
+                ]);
+
+                const techFeatures = ref([
+                    { id: 'push', name: 'Push-уведомления' },
+                    { id: 'chat', name: 'Чат' },
+                    { id: 'iap', name: 'Покупки в приложении' },
+                    { id: 'subscription', name: 'Подписка в приложении' },
+                    { id: 'auth', name: 'Регистрация и авторизация' },
+                    { id: 'admin', name: 'Админ панель - управление контентом через сайт' },
+                    { id: 'media', name: 'Загрузка фото или видео с устройства' },
+                    { id: 'ads', name: 'Реклама' },
+                    { id: 'geo', name: 'Геолокация и работа с картой' },
+                    { id: 'analytics', name: 'Аналитика об использовании приложения' }
+                ]);
+
+                const businessGoals = ref([
+                    { id: 'ad_revenue', name: 'Заработок с рекламы в приложении' },
+                    { id: 'iap_revenue', name: 'Заработок с покупок в приложении' },
+                    { id: 'community', name: 'Создать свое комьюнити' },
+                    { id: 'client_tool', name: 'Удобный инструмент для имеющихся клиентов' },
+                    { id: 'mobile_traffic', name: 'Получить трафик с мобильного приложения' },
+                    { id: 'new_markets', name: 'Выйти на новые рынки' },
+                    { id: 'investment', name: 'Получить инвестиции / грант' }
+                ]);
+
+                const handleFileUpload = (event) => {
+                    const files = Array.from(event.target.files);
+                    
+                    if (uploadedFiles.value.length + files.length > 5) {
+                        alert('Максимум 5 файлов');
+                        return;
+                    }
+                    
+                    for (const file of files) {
+                        if (file.size > 10 * 1024 * 1024) {
+                            alert(`Файл ${file.name} слишком большой. Максимум 10MB`);
+                            continue;
+                        }
+                        uploadedFiles.value.push(file);
+                    }
+                    
+                    event.target.value = '';
+                };
+
+                const removeFile = (fileToRemove) => {
+                    uploadedFiles.value = uploadedFiles.value.filter(file => file !== fileToRemove);
+                };
+
+                const submitForm = async () => {
+                    isSubmitting.value = true;
+                    
+                    try {
+                        const formData = {
+                            ...form.value,
+                            files: uploadedFiles.value.map(f => ({ name: f.name, size: f.size })),
+                            telegram_user: window.Telegram?.WebApp?.initDataUnsafe?.user,
+                            submitted_at: new Date().toISOString()
+                        };
+                        
+                        if (window.Telegram?.WebApp) {
+                            window.Telegram.WebApp.sendData(JSON.stringify(formData));
+                        } else {
+                            console.log('Brief data:', formData);
+                            alert('Бриф отправлен! Мы свяжемся с вами в течение 2 часов.');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Submit error:', error);
+                        alert('Ошибка отправки. Попробуйте еще раз.');
+                    } finally {
+                        isSubmitting.value = false;
+                    }
+                };
+
+                return {
+                    form,
+                    uploadedFiles,
+                    isSubmitting,
+                    appTypes,
+                    analogs,
+                    techFeatures,
+                    businessGoals,
+                    handleFileUpload,
+                    removeFile,
+                    submitForm
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
